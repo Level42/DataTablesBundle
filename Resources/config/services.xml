@@ -1,0 +1,35 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+
+    <parameters>
+        <parameter key="level42_data_tables.converter.class">Level42\Bundle\DataTablesBundle\DataTables\Request\ParamConverter\DataTablesParamConverter</parameter>       
+        
+        <parameter key="level42_data_tables.manager.class">Level42\Bundle\DataTablesBundle\DataTables\Manager</parameter>
+        
+        <parameter key="level42_data_tables.factory.doctrine.class">Level42\Bundle\DataTablesBundle\DataTables\Factory\Doctrine</parameter>
+        <parameter key="level42_data_tables.builder.doctrine.class">Level42\Bundle\DataTablesBundle\DataTables\Builder\Doctrine</parameter>
+        <parameter key="level42_data_tables.result.doctrine.class">Level42\Bundle\DataTablesBundle\DataTables\Result\Doctrine</parameter>
+    </parameters>
+
+    <services>
+        <service id="level42_data_tables.manager" class="%level42_data_tables.manager.class%" >
+        </service>	
+                
+        <service id="level42_data_tables.factory.doctrine" class="%level42_data_tables.factory.doctrine.class%">
+            <argument type="service" id="doctrine" on-invalid="ignore" />
+            <argument>%level42_data_tables.builder.doctrine.class%</argument>
+            <argument type="service" id="jms_serializer.serializer" on-invalid="ignore" />
+            <tag name="data_tables.factory_builder" builder="doctrine.orm" resultClass="%level42_data_tables.result.doctrine.class%"/>
+        </service>		
+
+        <service id="level42_data_tables.converter" class="%level42_data_tables.converter.class%">
+            <argument type="service" id="level42_data_tables.manager" />
+            <tag name="request.param_converter" converter="dataTables" priority="+10"/>
+        </service>
+    </services>
+    
+</container>

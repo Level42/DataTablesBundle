@@ -12,7 +12,7 @@
         
         <parameter key="level42_data_tables.factory.doctrine.class">Level42\Bundle\DataTablesBundle\DataTables\Factory\Doctrine</parameter>
         <parameter key="level42_data_tables.builder.doctrine.class">Level42\Bundle\DataTablesBundle\DataTables\Builder\Doctrine</parameter>
-        <parameter key="level42_data_tables.result.doctrine.class">Level42\Bundle\DataTablesBundle\DataTables\Result\Doctrine</parameter>
+        <parameter key="level42_data_tables.result.doctrine.class">Level42\Bundle\DataTablesBundle\DataTables\Result\DataTablesResultDoctrine</parameter>
     </parameters>
 
     <services>

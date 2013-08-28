@@ -6,7 +6,7 @@ use JMS\Serializer\Annotation\SerializedName;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 
-class Doctrine
+class DataTablesResultDoctrine implements DataTablesResultInterface
 {
     /**
      * @SerializedName("aaData")

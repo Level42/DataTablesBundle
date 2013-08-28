@@ -20,7 +20,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 
 /**
- * DoctrineParamConverter.
+ * DataTablesParamConverter.
  *
  * @author David J level42
  */
@@ -65,6 +65,9 @@ class DataTablesParamConverter implements ParamConverterInterface
         /* @var $builder BuilderInterface  */
         $builder = $factory->createBuilder();    
         
+        $resultClass = $configuration->getClass();
+        $builder->setResultClass( new $resultClass() );
+        
         $builder->setOptions($this->getOptions($configuration));
         
         if ($request->isMethod("GET"))
@@ -77,7 +80,7 @@ class DataTablesParamConverter implements ParamConverterInterface
         }
         
         $builder->setRequestParams($requestParams);
-        
+                
         $builder->init();
         
         $request->attributes->set($name,$builder->getResult() );

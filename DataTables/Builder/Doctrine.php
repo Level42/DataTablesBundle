@@ -162,6 +162,12 @@ class Doctrine extends BuilderAbstract
      */
     protected $limit;
     
+    /**
+     * 
+     * @var string class of the result data object 
+     */
+    protected $resultClass;
+    
     
     public function __construct(RegistryInterface $registry = null)
     {
@@ -170,14 +176,14 @@ class Doctrine extends BuilderAbstract
 
     public function init()
     {
-        $this->setBuilderProperties();
-        $this->setParameters();
+        $this->initBuilderProperties();
+        $this->initParameters();
     }
     /**
      * Fill properties of the doctrine builder
      * 
      */
-    public function setBuilderProperties()
+    public function initBuilderProperties()
     {
         $options = $this->getOptions();
         $entityClassName = $this->getClassName($options["entity_class"]);
@@ -273,7 +279,7 @@ class Doctrine extends BuilderAbstract
     /**
      * Parse and configure parameter/association information for this DataTable request
      */
-    public function setParameters()
+    public function initParameters()
     {
         if (is_numeric($this->requestParams->getNbDisplayedColumns())) {
             $params = array();
@@ -617,7 +623,7 @@ class Doctrine extends BuilderAbstract
      */
     public function executeSearch()
     {
-        $output = new ResultDoctrine();
+        $output = new $this->resultClass();
 
         $query = $this->qb->getQuery()->setHydrationMode(Query::HYDRATE_ARRAY);
         $items = $this->useDoctrinePaginator ?
@@ -678,6 +684,12 @@ class Doctrine extends BuilderAbstract
         return false;
     }
 
+    
+    public function setResultClass($resultClass)
+    {
+    	$this->resultClass = $resultClass;
+    }
+    
     public function getResult()
     {
         $this->makeSearch();

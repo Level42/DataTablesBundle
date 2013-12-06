@@ -509,15 +509,42 @@ class Doctrine extends BuilderAbstract
         $searches = $this->requestParams->getSearches();
         if ($searches && join("", $searches)!='')
         {
-            $andExpr = $qb->expr()->andX();
+        	$rangeSeparator = $this->requestParams->getRangeSeparator();
+        	$andExpr = $qb->expr()->andX();
             foreach($this->parameters as $i => $name) {
-                if (isset($searchables[$name]) && $searchables[$name]  && $searches[$name] != '') {
+                if (isset($searchables[$name]) && $searchables[$name]  && $searches[$name] != '' && (!$rangeSeparator ||  $searches[$name]!=$rangeSeparator)) {
                     $qbParam = "search_single_{$this->associations[$i]['entityName']}_{$this->associations[$i]['fieldName']}";
-                    $andExpr->add($qb->expr()->like(
-                        $this->associations[$i]['fullName'],
-                        ":$qbParam"
-                    ));
-                    $qb->setParameter($qbParam, "%" . $searches[$name] . "%");
+                    
+                    // range filtering field
+                    if ($rangeSeparator && strpos( $searches[$name],$rangeSeparator)!==false)
+                    {                   
+						$values= split($rangeSeparator, $searches[$name]);
+						if ($values[0] != "")
+						{
+							$andExpr->add($qb->expr()->gte(
+									$this->associations[$i]['fullName'],
+									":$qbParam"
+							));
+							$qb->setParameter($qbParam, $values[0]);							
+						}
+						if ($values[1] != "")
+						{
+							$andExpr->add($qb->expr()->lte(
+									$this->associations[$i]['fullName'],
+									":".$qbParam."1"
+							));
+							$qb->setParameter($qbParam."1", $values[1]);
+						}						
+                    }
+                    // simple filtering field
+                    else
+                    {
+                    	$andExpr->add($qb->expr()->like(
+                    			$this->associations[$i]['fullName'],
+                    			":$qbParam"
+                    	));
+                    	$qb->setParameter($qbParam, "%" . $searches[$name] . "%");                    	
+                    }
                 }
             }
             if ($andExpr->count() > 0) {

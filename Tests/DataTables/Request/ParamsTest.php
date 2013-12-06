@@ -35,7 +35,7 @@ class ParamsTest extends \PHPUnit_Framework_TestCase
         $request->set("mDataProp_0", "field1");
         $request->set("mDataProp_1", "field2");
         $request->set("sEcho", "delay");
-        //request->set("", $value);
+        $request->set("sRangeSeparator", "~");
         $this->params = new Params($request);
     }
     
@@ -145,4 +145,9 @@ class ParamsTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertEquals("delay",$this->params->getEcho());
     }    
+    
+    public function testGetRangeSeparator()
+    {
+        $this->assertEquals("~",$this->params->getRangeSeparator());
+    }
 }

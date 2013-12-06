@@ -227,5 +227,15 @@ class Params
     {
         return $this->request->get("sEcho","0");
     }
-
+	
+    
+    /**
+     * Get separator for field range
+     * @return string
+     */
+    public function getRangeSeparator()
+    {
+    	return $this->request->get("sRangeSeparator",false);
+    }
+    
 }

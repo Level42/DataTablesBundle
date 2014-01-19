@@ -23,6 +23,7 @@ use Doctrine\ORM\QueryBuilder;
 
 use Level42\Bundle\DataTablesBundle\DataTables\Result\Doctrine as ResultDoctrine;
 use Level42\Bundle\DataTablesBundle\DataTables\Builder\BuilderInterface;
+use Doctrine\ORM\EntityManager;
 
 
 class Doctrine extends BuilderAbstract
@@ -54,6 +55,11 @@ class Doctrine extends BuilderAbstract
     
     /**
      * @var RegistryInterface
+     */
+    protected $registry;
+    
+    /**
+     * @var EntityManager
      */
     protected $em;
     
@@ -171,7 +177,7 @@ class Doctrine extends BuilderAbstract
     
     public function __construct(RegistryInterface $registry = null)
     {
-        $this->em = $registry;
+        $this->registry = $registry;
     }
 
     public function init()
@@ -187,12 +193,13 @@ class Doctrine extends BuilderAbstract
     {
         $options = $this->getOptions();
         $entityClassName = $this->getClassName($options["entity_class"]);
+        $this->em = $this->registry->getEntityManagerForClass($entityClassName);
         $this->repository = $this->em->getRepository($entityClassName);
-        $this->metadata = $this->em->getManager()->getClassMetadata($entityClassName);
+        $this->metadata = $this->em->getClassMetadata($entityClassName);
         $this->tableName = Container::camelize($this->metadata->getTableName());
         $this->defaultJoinType = self::JOIN_INNER;
         $this->defaultResultType = self::RESULT_RESPONSE;
-        $this->qb = $this->em->getEntityManager()->createQueryBuilder();
+        $this->qb = $this->em->createQueryBuilder();
         $identifiers = $this->metadata->getIdentifierFieldNames();
         $this->rootEntityIdentifier = array_shift($identifiers);
     }    
@@ -208,21 +215,25 @@ class Doctrine extends BuilderAbstract
     {
         if (strpos($className, ':') !== false) {
             list($namespaceAlias, $simpleClassName) = explode(':', $className);
-            $className = $this->em->getAliasNamespace($namespaceAlias) . '\\' . $simpleClassName;
+            $className = $this->registry->getAliasNamespace($namespaceAlias) . '\\' . $simpleClassName;
         }
         elseif ( strpos($className, '\\') === false && !class_exists($className))
         {
-           $config = $this->em->getEntityManager()->getConfiguration();
-           $namespaces = $config->getEntityNamespaces();
-           $classNameToTest="";
-           foreach ($namespaces as $namespace)
-           {
-               $classNameToTest = $namespace . '\\' . $className;
-               if (class_exists($classNameToTest))
-               {
-                   return $classNameToTest;
-               }
-           }
+            $ems = $this->registry->getEntityManagers();
+            foreach ($ems as $em)
+            {    
+                $config = $em->getConfiguration();
+                $namespaces = $config->getEntityNamespaces();
+                $classNameToTest="";
+                foreach ($namespaces as $namespace)
+                {
+                    $classNameToTest = $namespace . '\\' . $className;
+                    if (class_exists($classNameToTest))
+                    {
+                        return $classNameToTest;
+                    }
+                }
+            }
         }
         
         return $className;
@@ -326,7 +337,7 @@ class Doctrine extends BuilderAbstract
                     $association['containsCollections'] = true;
                 }
                 $targetClass = $metadata->getAssociationTargetClass($entityName);
-                $om = $this->em->getManager();
+                $om = $this->registry->getManagerForClass($targetClass);
                 $metadata = $om->getClassMetadata($targetClass);
                 $joinName .= '_' . $this->getJoinName(
                     $metadata,

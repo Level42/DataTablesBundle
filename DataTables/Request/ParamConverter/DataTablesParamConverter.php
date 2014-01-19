@@ -50,7 +50,7 @@ class DataTablesParamConverter implements ParamConverterInterface
         
         if ($request->attributes->has("entity_class"))
         {
-            $options["entity_class"] = Inflector::camelize(Inflector::singularize($request->attributes->get("entity_class")));
+            $options["entity_class"] = Inflector::classify(Inflector::singularize($request->attributes->get("entity_class")));
             $configuration->setOptions($options);
         }
 
